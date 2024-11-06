@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * @author ZuevMYu
@@ -41,11 +42,24 @@ public class MySecurityConfig {
         return manager;
     }
 
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+//        httpSecurity.authorizeRequests(authorize -> authorize.anyRequest().authenticated())
+//                .formLogin(Customizer.withDefaults())
+//                .httpBasic(Customizer.withDefaults());
+//        return httpSecurity.build();
+//    }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeRequests(authorize -> authorize.anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults());
-        return httpSecurity.build();
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.authorizeHttpRequests((user) -> user
+                .requestMatchers(new AntPathRequestMatcher("/")).hasAnyRole("HR", "MANAGER", "IT", "EMPLOYEE")
+                .requestMatchers(new AntPathRequestMatcher("/manager_info/**")).hasRole("MANAGER")
+                .requestMatchers(new AntPathRequestMatcher("/hr_info/**")).hasRole("HR")
+                .anyRequest().authenticated()
+        ).formLogin(Customizer.withDefaults());
+
+
+        return http.build();
     }
 }
